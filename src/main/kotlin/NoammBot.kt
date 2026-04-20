@@ -26,5 +26,6 @@ object NoammBot {
 
         EventBus.registerOnce<ReadyEvent> { logger.info("Logged in as ${client.selfUser.asTag}") }
         CommandManager.registerCommands(client)
+        EventBus.register(client, "features")
     }
 }

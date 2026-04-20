@@ -10,7 +10,7 @@ import kotlin.math.floor
 
 @Command
 object CalcPingCommand: DiscordCommand() {
-    override val data = Commands.slash("/calcdelay", "Calculates the recommanded delay for AutoTerms")
+    override val data = Commands.slash("calcdelay", "Calculates the recommanded delay for AutoTerms")
         .addOption(OptionType.INTEGER, "ping", "Your ingame ping", true)
 
     override fun run(event: SlashCommandInteractionEvent) {
