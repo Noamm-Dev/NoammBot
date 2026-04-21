@@ -4,11 +4,9 @@ import annotations.Command
 import interfaces.DiscordCommand
 import net.dv8tion.jda.api.JDA
 import org.reflections.Reflections
-import org.slf4j.LoggerFactory
 import utils.ReflectionUtils
 
 object CommandManager {
-    private val logger = LoggerFactory.getLogger(this::class.simpleName)
     private val commands = mutableListOf<DiscordCommand>()
 
     fun registerCommands(client: JDA) {
@@ -19,12 +17,13 @@ object CommandManager {
                 commands.add(instance)
             }
             catch (e: Exception) {
-                logger.error("Failed to load command: ${clazz.simpleName}", e)
+                println("Failed to load command: ${clazz.simpleName}")
+                e.printStackTrace()
             }
         }
 
         client.updateCommands().addCommands(commands.map(DiscordCommand::data)).queue {
-            logger.info("Successfully loaded ${it.size} application (/) commands.")
+            println("Successfully loaded ${it.size} application (/) commands.")
         }
     }
 }

@@ -1,7 +1,6 @@
 package managers
 
 import NoammBot
-import NoammBot.logger
 import com.google.gson.Gson
 import interfaces.ai.ChatMessage
 import interfaces.ai.ChatRequest
@@ -14,7 +13,7 @@ import kotlin.system.exitProcess
 
 object AiService {
     private val apiKey = System.getenv("GROQ_API_KEY") ?: run {
-        logger.error("GROQ_API_KEY not set")
+        println("GROQ_API_KEY not set")
         exitProcess(1)
     }
 

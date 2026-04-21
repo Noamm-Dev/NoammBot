@@ -5,12 +5,9 @@ import managers.AiService
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.EventListener
-import org.slf4j.LoggerFactory
 
 @BotEvent
 object ChatBot: EventListener {
-    private val logger = LoggerFactory.getLogger(this::class.simpleName)
-
     private const val BOT_COMMANDS = "1450943955624792300"
     private const val BOT_CD = 2000L
     private val allowedRoles = listOf("Donor", "my son")
@@ -49,7 +46,7 @@ object ChatBot: EventListener {
                 event.message.reply(safeResponse).setAllowedMentions(emptyList()).setSuppressedNotifications(true).queue()
             }
             catch (e: Exception) {
-                logger.error("AI Reply Error", e)
+                e.printStackTrace()
                 event.message.reply("Sorry, my brain is currently offline.").queue()
             }
         }.start()

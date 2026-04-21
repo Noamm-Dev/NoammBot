@@ -6,12 +6,9 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import org.reflections.Reflections
-import org.slf4j.LoggerFactory
 import utils.ReflectionUtils
 
 object EventBus {
-    private val logger = LoggerFactory.getLogger(this::class.java.simpleName)
-
     /**
      * Scans the specified package for classes annotated with @BotEvent
      * and registers them to the JDA client.
@@ -20,13 +17,13 @@ object EventBus {
         Reflections(packageName).getTypesAnnotatedWith(BotEvent::class.java).forEach { clazz ->
             try {
                 val instance = ReflectionUtils.getInstance(clazz) as? EventListener
-                    ?: return@forEach logger.warn("Class ${clazz.name} is annotated with @BotEvent but does not implement EventListener")
+                    ?: return@forEach println("Class ${clazz.name} is annotated with @BotEvent but does not implement EventListener")
 
                 jda.addEventListener(instance)
-                logger.info("Successfully registered listener: ${clazz.simpleName}")
+                println("Successfully registered listener: ${clazz.simpleName}")
             }
             catch (e: Exception) {
-                logger.error("Failed to register listener ${clazz.name}: ${e.message}")
+                println("Failed to register listener ${clazz.name}: ${e.message}")
             }
         }
     }
