@@ -14,7 +14,7 @@ dependencies {
 tasks.jar { enabled = false }
 tasks.shadowJar {
     manifest { attributes["Main-Class"] = "NoammBot" }
-    archiveBaseName.set("noammbot")
+    archiveBaseName.set("NoammBot")
     archiveClassifier.set("")
     archiveVersion.set("")
 }
