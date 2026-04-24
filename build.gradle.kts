@@ -17,6 +17,9 @@ tasks.shadowJar {
     archiveBaseName.set("NoammBot")
     archiveClassifier.set("")
     archiveVersion.set("")
+    
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
 }
 
 tasks.build.get().dependsOn(tasks.shadowJar)
