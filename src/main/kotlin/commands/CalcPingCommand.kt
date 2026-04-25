@@ -5,13 +5,14 @@ import interfaces.DiscordCommand
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
+import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import kotlin.math.ceil
 import kotlin.math.floor
 
 @Command
 object CalcPingCommand: DiscordCommand() {
     override val data = Commands.slash("calcdelay", "Calculates the recommanded delay for AutoTerms")
-        .addOption(OptionType.INTEGER, "ping", "Your ingame ping", true)
+        .addOptions(OptionData(OptionType.INTEGER, "ping", "Your ingame ping", true).setMinValue(0).setMaxValue(2000))
 
     override fun run(event: SlashCommandInteractionEvent) {
         val ping = event.getOption("ping")?.asInt ?: return event.reply("You forgot to input a ping meow!").queue()
