@@ -1,7 +1,6 @@
 package managers
 
 import NoammBot
-import com.google.gson.Gson
 import interfaces.ai.ChatMessage
 import interfaces.ai.ChatRequest
 import interfaces.ai.ChatResponse
@@ -17,7 +16,6 @@ object AiService {
         exitProcess(1)
     }
 
-    private val gson = Gson()
     private val conversations = mutableMapOf<Long, MutableList<ChatMessage>>()
     private const val MAX_HISTORY = 20
 
@@ -76,7 +74,7 @@ object AiService {
             temperature = temp.toDouble(),
         )
 
-        val body = gson.toJson(requestBody).toRequestBody("application/json".toMediaType())
+        val body = NoammBot.gson.toJson(requestBody).toRequestBody("application/json".toMediaType())
         val request = Request.Builder()
             .url("https://api.groq.com/openai/v1/chat/completions")
             .addHeader("Authorization", "Bearer $apiKey")
@@ -86,7 +84,7 @@ object AiService {
         NoammBot.httpClient.newCall(request).execute().use { response ->
             if (! response.isSuccessful) return "Error: ${response.code}"
             val jsonResponse = response.body?.string()
-            val result = gson.fromJson(jsonResponse, ChatResponse::class.java)
+            val result = NoammBot.gson.fromJson(jsonResponse, ChatResponse::class.java)
             return result.choices.firstOrNull()?.message?.content
         }
     }

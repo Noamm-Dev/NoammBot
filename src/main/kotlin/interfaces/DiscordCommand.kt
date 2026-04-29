@@ -11,7 +11,7 @@ abstract class DiscordCommand: EventListener {
 
     final override fun onEvent(event: GenericEvent) {
         when (event) {
-            is SlashCommandInteractionEvent -> run(event)
+            is SlashCommandInteractionEvent -> if (event.name == data.name) run(event)
             is CommandAutoCompleteInteractionEvent -> onAutoComplate(event)
         }
     }

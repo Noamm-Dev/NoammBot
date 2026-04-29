@@ -1,3 +1,4 @@
+import com.google.gson.GsonBuilder
 import managers.CommandManager
 import managers.EventBus
 import net.dv8tion.jda.api.JDA
@@ -9,6 +10,7 @@ import kotlin.system.exitProcess
 
 object NoammBot {
     val httpClient = OkHttpClient()
+    val gson = GsonBuilder().setPrettyPrinting().create()
 
     lateinit var client: JDA
         private set
