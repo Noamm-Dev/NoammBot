@@ -6,11 +6,10 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
-import kotlin.math.ceil
-import kotlin.math.floor
+import kotlin.math.round
 
 @Command
-object CalcPingCommand: DiscordCommand() {
+object CalculateDelayCommand: DiscordCommand() {
     override val data = Commands.slash("calcdelay", "Calculates the recommanded delay for AutoTerms")
         .addOptions(OptionData(OptionType.INTEGER, "ping", "Your ingame ping", true).setMinValue(0).setMaxValue(2000))
 
@@ -22,8 +21,8 @@ object CalcPingCommand: DiscordCommand() {
 
         if (medianPing <= 0) event.reply("min: 0ms, max: 0ms").queue()
         else {
-            val min = floor(0.8 * medianPing).toInt()
-            val max = ceil(1.2 * medianPing).toInt()
+            val min = (round(0.8 * medianPing / 10.0) * 10).toInt()
+            val max = (round(1.2 * medianPing / 10.0) * 10).toInt()
             event.reply("min: ${min}ms, max: ${max}ms").queue()
         }
     }
