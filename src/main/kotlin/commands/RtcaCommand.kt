@@ -11,7 +11,6 @@ import okhttp3.Request
 
 @Command
 object RtcaCommand: DiscordCommand() {
-    private const val API_BASE = "https://api.noamm.org/hypixel/rtca"
     private val nameRegex = "^[a-zA-Z0-9_]{3,16}$".toRegex()
 
     override val data = Commands.slash("rtca", "Calculates the needed runs for each class until you hit class average 50")
@@ -24,7 +23,7 @@ object RtcaCommand: DiscordCommand() {
         event.deferReply().queue()
 
         Thread {
-            val request = Request.Builder().url("$API_BASE/$name").build()
+            val request = Request.Builder().url("https://api.noamm.org/hypixel/rtca/$name").build()
             val msg = try {
                 NoammBot.httpClient.newCall(request).execute().use { response ->
                     if (! response.isSuccessful) "Failed to fetch data! (API returned HTTP ${response.code})"
