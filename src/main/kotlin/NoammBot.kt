@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.events.session.ReadyEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
+import net.dv8tion.jda.internal.utils.JDALogger
 import okhttp3.OkHttpClient
 import kotlin.system.exitProcess
 
@@ -22,6 +23,7 @@ object NoammBot {
             exitProcess(1)
         }
 
+        JDALogger.setFallbackLoggerEnabled(false)
         client = JDABuilder.createDefault(token).enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT).build()
 
         EventBus.registerOnce<ReadyEvent> { println("Logged in as ${client.selfUser.asTag}") }
