@@ -1,9 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
     <list size="2">
       <item index="0" class="java.lang.String" itemvalue="annotations.BotEvent" />
       <item index="1" class="java.lang.String" itemvalue="annotations.Command" />
     </list>
+    <pattern value="interfaces.SlashCommand" hierarchically="true" />
+    <pattern value="interfaces.KordListener" hierarchically="true" />
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">

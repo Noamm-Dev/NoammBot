@@ -1,16 +1,18 @@
-<configuration>
+<configuration debug="false">
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <withJansi>true</withJansi>
-        <encoder>
-            <pattern>%green([%d{HH:mm:ss}]) %blue([%logger{0}]) %highlight(%msg) %n</pattern>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%green([%d{HH:mm:ss}]) %blue([%logger{0}]) %highlight(%msg)\n</pattern>
         </encoder>
     </appender>
 
-    <!-- Silence JDA and Reflections -->
     <logger name="net.dv8tion.jda" level="INFO"/>
     <logger name="org.reflections" level="WARN"/>
+    <logger name="io.ktor" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
+
 </configuration>

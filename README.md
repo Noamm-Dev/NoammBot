@@ -5,10 +5,10 @@ Discord bot with Kotlin + JDA. AI conversations via Groq API. Custom event manag
 ## ️ Tech Stack
 
 - **Language**: [Kotlin](https://kotlinlang.org)
-- **Library**: [JDA](https://github.com/discord-jda/JDA)
+- **Library**: [Kord](https://github.com/kordlib/kord)
 - **AI**: [Groq API](https://groq.com)
 - **JSON**: [Gson](https://github.com/google/gson)
-- **DI/Reflection**: [Reflections](https://github.com/ronmamo/reflections)
+- **DI/Reflection**: [ClassGraph](https://github.com/classgraph/classgraph)
 - **Build**: [Gradle](https://gradle.org) Kotlin DSL + Shadow Jar.
 
 ## Setup
@@ -54,11 +54,10 @@ java -jar build/libs/NoammBot.jar
     - `NoammBot.kt`: Entry point.
     - `commands/`: Slash commands.
     - `features/`: Modular features/listeners.
-    - `managers/`: AI, Commands, Event Bus.
+    - `services/`: AI, Commands, Event Bus.
     - `interfaces/`: API models + interfaces.
-    - `annotations/`: Auto-registration annotations.
 - `src/main/resources/`:
-    - `faq.json`: FAQ config.
+    - `NoammAI.md`: AI config.
     - `logback.xml`: Logging config.
 
 ## Contributing
