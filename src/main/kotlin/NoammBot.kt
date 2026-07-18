@@ -2,6 +2,7 @@ import com.google.gson.GsonBuilder
 import dev.kord.core.Kord
 import dev.kord.core.event.Event
 import dev.kord.core.event.gateway.ReadyEvent
+import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.on
 import dev.kord.gateway.Intent
@@ -21,7 +22,8 @@ import org.slf4j.LoggerFactory
 
 @OptIn(PrivilegedIntent::class)
 object NoammBot {
-    val token = System.getenv("DISCORD_BOT_TOKEN") ?: error("DISCORD_BOT_TOKEN not set")
+    private val token = System.getenv("DISCORD_BOT_TOKEN") ?: error("DISCORD_BOT_TOKEN not set")
+
     val logger = LoggerFactory.getLogger(this::class.java)
     val gson = GsonBuilder().setPrettyPrinting().create()
     val httpClient = HttpClient(CIO) {
@@ -40,6 +42,17 @@ object NoammBot {
                 client.registerListeners(result)
                 client.registerCommands(result)
             }
+
+            kord.guilds.collect {
+                logger.info("Loaded guild ${it.name}")
+                if (it.id.value.toLong() in Config.allowedServers) return@collect
+                logger.info("Leaving guild ${it.name} (${it.id})")
+                it.leave()
+            }
+        }
+
+        client.on<GuildCreateEvent> {
+            if (guild.id.value.toLong() !in Config.allowedServers) guild.leave()
         }
 
         client.login {

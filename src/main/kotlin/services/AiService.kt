@@ -6,8 +6,8 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -45,32 +45,26 @@ object AiService {
         chatMessages.add(ChatMessage("system", aiRole))
         chatMessages.addAll(convo.messages)
 
-        val reply = callGroq(chatMessages) ?: "meow error happened"
-        convo.messages.add(ChatMessage("assistant", reply))
-        return reply
+        val reply = callGroq(chatMessages)?.also { convo.messages.add(ChatMessage("assistant", it)) }
+        return reply ?: "meow error happened"
     }
 
-    private suspend fun callGroq(messages: List<ChatMessage>): String? {
-        val body = NoammBot.gson.toJson(ChatRequest("openai/gpt-oss-120b", messages, 0.1))
-
-        return try {
-            val response = NoammBot.httpClient.post("https://api.groq.com/openai/v1/chat/completions") {
-                header("Authorization", "Bearer $apiKey")
-                contentType(ContentType.Application.Json)
-                setBody(body)
-            }
-
-            if (response.status != HttpStatusCode.OK) return "Error: ${response.status.value}"
-
-            response.body<ChatResponse>().choices.firstOrNull()?.message?.content
+    private suspend fun callGroq(messages: List<ChatMessage>): String? = try {
+        val response = NoammBot.httpClient.post("https://api.groq.com/openai/v1/chat/completions") {
+            header("Authorization", "Bearer $apiKey")
+            contentType(ContentType.Application.Json)
+            setBody(ChatRequest("openai/gpt-oss-120b", messages, 0.1))
         }
-        catch (e: Exception) {
-            "Error: ${e.message}"
-        }
+
+        if (! response.status.isSuccess()) return "Error: ${response.status.value}"
+
+        response.body<ChatResponse>().choices.firstOrNull()?.message?.content
+    }
+    catch (e: Exception) {
+        "Error: ${e.message}"
     }
 
-
-    private data class Conversation(val messages: MutableList<ChatMessage>, var lastActive: Long)
+    private class Conversation(val messages: MutableList<ChatMessage>, var lastActive: Long)
     @Serializable private data class ChatRequest(val model: String, val messages: List<ChatMessage>, val temperature: Double)
     @Serializable private data class ChatMessage(val role: String, val content: String)
     @Serializable private data class ChatResponse(val choices: List<Choice>)

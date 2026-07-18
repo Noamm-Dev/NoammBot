@@ -5,6 +5,7 @@ import kotlinx.datetime.Clock
 
 object Config {
     val isLocal = System.getProperty("os.name").lowercase().contains("win")
+    val allowedServers = listOf(1281979747605418024, 974393871058477116)
     val Noamm = Snowflake(601764042704683040)
     const val NOAMM_API = "http://localhost:6767"
 

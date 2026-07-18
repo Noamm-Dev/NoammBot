@@ -1,52 +1,109 @@
 package features
 
+import Config
+import dev.kord.common.entity.Snowflake
+import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.behavior.reply
+import dev.kord.core.entity.Member
+import dev.kord.core.entity.User
+import dev.kord.core.entity.interaction.GuildChatInputCommandInteraction
 import dev.kord.core.event.Event
+import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.rest.builder.interaction.GlobalChatInputCreateBuilder
+import dev.kord.rest.builder.interaction.string
 import interfaces.KordListener
+import interfaces.SlashCommand
+import kotlinx.coroutines.flow.firstOrNull
 import services.AiService
+import java.util.concurrent.atomic.*
 
-object ChatBot: KordListener {
-    private const val BOT_COMMANDS = 1450943955624792300
+object ChatBot: KordListener, SlashCommand {
+    private const val BOT_COMMANDS = 1450943955624792300L
     private const val BOT_CD = 2000L
     private val allowedRoles = listOf("Donor", "my son")
-    private var lastSent = 0L
+    private val lastSent = AtomicLong(0L)
+
+    override val name = "ask"
+    override val description = "Share your dreams with NoammAi"
+
+    override fun setup(builder: GlobalChatInputCreateBuilder) {
+        builder.string("prompt", "what do you want to ask") {
+            required = true
+        }
+    }
 
     override suspend fun onEvent(event: Event) {
         if (event !is MessageCreateEvent) return
-        if (event.message.author?.isBot == true) return
-        val guild = event.getGuildOrNull() ?: return
 
-        val isOwner = guild.ownerId == event.message.author?.id
-        if (event.message.channelId.value.toLong() != BOT_COMMANDS && ! isOwner) return
+        val author = event.message.author?.takeUnless { it.isBot } ?: return
+        val selfId = event.kord.selfId
 
-        val selfId = event.kord.getSelf().id
-        if (! event.message.mentionedUserIds.contains(selfId)) return
+        if (selfId !in event.message.mentionedUserIds) return
+        val prompt = event.message.content.replace("<@$selfId>", "").replace("<@!$selfId>", "").trim()
 
-        val member = event.member ?: return
-        var hasAllowedRole = false
-        member.roles.collect { if (it.name in allowedRoles) hasAllowedRole = true }
+        handleAsk(
+            author = author,
+            member = event.member,
+            channelId = event.message.channelId,
+            prompt = prompt,
+            authorIdForAI = author.id.value.toLong(),
+            onTyping = { event.message.channel.type() },
+            onReply = { text -> event.message.reply { content = text } }
+        )
+    }
 
+    override suspend fun run(event: ChatInputCommandInteractionCreateEvent) {
+        val response = event.interaction.deferPublicResponse()
+        val author = event.interaction.user
+        val member = (event.interaction as? GuildChatInputCommandInteraction)?.user
+        val prompt = event.interaction.command.strings["prompt"]?.trim().orEmpty()
+
+        handleAsk(
+            author = author,
+            member = member,
+            channelId = event.interaction.channelId,
+            prompt = prompt,
+            authorIdForAI = author.id.value.toLong(),
+            onReply = { text -> response.respond { content = text } }
+        )
+    }
+
+
+    private suspend fun handleAsk(
+        author: User?,
+        member: Member?,
+        channelId: Snowflake,
+        prompt: String,
+        authorIdForAI: Long,
+        onTyping: suspend () -> Unit = {},
+        onReply: suspend (String) -> Unit,
+    ) {
+        if (author?.isBot == true) return
+        if (prompt.isBlank()) return onReply("Ask me something first!")
+
+        val isOwner = Config.Noamm == author?.id
+        if (channelId.value.toLong() != BOT_COMMANDS && ! isOwner) return
+
+        val hasAllowedRole = member?.roles?.firstOrNull { it.name in allowedRoles } != null
         if (! isOwner && ! hasAllowedRole) {
-            event.message.reply { content = "Sorry, Only sexy people can talk to me. (Donors/Sons)" }
+            onReply("Sorry, Only sexy people can talk to me. (Donors/Sons)")
             return
         }
 
         val now = System.currentTimeMillis()
-        if (now - lastSent < BOT_CD) return
-        lastSent = now
+        val prev = lastSent.getAndUpdate { if (now - it >= BOT_CD) now else it }
+        if (now - prev < BOT_CD) return
 
-        val cleanMessage = event.message.content.replace("<@$selfId>", "").replace("<@!$selfId>", "").trim().ifBlank { return }
-        event.message.channel.type()
+        onTyping()
 
         try {
-            val aiResponse = AiService.callAI(event.message.author !!.id.value.toLong(), cleanMessage)
-            val safeResponse = if (aiResponse.length > 1800) aiResponse.substring(0, 1800) else aiResponse
-            event.message.reply { content = safeResponse }
+            val aiResponse = AiService.callAI(authorIdForAI, prompt)
+            onReply(aiResponse.take(1800))
         }
         catch (e: Exception) {
             e.printStackTrace()
-            event.message.reply { content = "Sorry, my brain is currently offline." }
+            onReply("Sorry, my brain is currently offline.")
         }
     }
 }
